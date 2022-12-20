@@ -13,11 +13,17 @@ class Cube3D():
         glBegin(GL_LINES)
         for edge in self.edges:
             for vertex in edge:
-                glVertex3fv(verticies[vertex])
+                glVertex3fv(self.verticies[vertex])
         glEnd()
 
 
-def main(cube):
+def main():
+    verticies = ((1, -1, -1), (1, 1, -1), (-1, 1, -1), (-1, -1, -1),
+                (1, -1, 1), (1, 1, 1), (-1, -1, 1), (-1, 1, 1))
+    edges = ((0,1), (0,3), (0,4), (2,1),(2,3), (2,7), (6,3), (6,4),(6,7), (5,1), (5,4), (5,7))
+    # Set up cube class
+    cube = Cube3D(verticies, edges)
+
     pygame.init()
     clock = pygame.time.Clock()
 
@@ -35,17 +41,14 @@ def main(cube):
                 pygame.quit()
                 exit()
 
+        # Rotate cube
         glRotatef(1, 3, 1, 1)
+        # Clear Screen
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
         cube.drawCube()
 
         pygame.display.flip()
 
 if __name__ == "__main__":
-    verticies = ((1, -1, -1), (1, 1, -1), (-1, 1, -1), (-1, -1, -1),
-                (1, -1, 1), (1, 1, 1), (-1, -1, 1), (-1, 1, 1))
-    edges = ((0,1), (0,3), (0,4), (2,1),(2,3), (2,7), (6,3), (6,4),(6,7), (5,1), (5,4), (5,7))
-
-    cube = Cube3D(verticies, edges)
-    main(cube)
+    main()
 
