@@ -43,6 +43,16 @@ class Player():
             glTranslatef(0, 0, -0.1)
 
 
+    def camera_vertical(self, mouse_delta_y):
+        self.up_down_angle += mouse_delta_y*self.mouse_rotation_speed
+        glRotatef(self.up_down_angle, 1.0, 0.0, 0.0)
+
+
+    def camera_horizontal(self, mouse_delta_x):
+        glRotatef(mouse_delta_x*self.mouse_rotation_speed, 0.0, 1.0, 0.0)
+
+
+
 def main():
     vertices = [
         (-1, 1, 1, 1),  # vertex 0
@@ -84,29 +94,61 @@ def main():
     display = (800, 600)
     pygame.display.set_mode(display, DOUBLEBUF|OPENGL)
     
+    glMatrixMode(GL_PROJECTION)
     # Set up a perspective projection with a 120 degree field of view
     gluPerspective(90, (display[0]/display[1]), 0.1, 50.0)
 
+    glMatrixMode(GL_MODELVIEW)
     # Move camera
     gluLookAt(0, -8, 0, 0, 0, 0, 0, 0, 1)
-
+    viewMatrix = glGetFloatv(GL_MODELVIEW_MATRIX)
+    glLoadIdentity()
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
+        
+        mouse_delta_x, mouse_delta_y = pygame.mouse.get_rel()
+        # init model view matrix
+        glLoadIdentity()
 
-        # Clear screen
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+        # Rotate camera up or down
+        player.camera_vertical(mouse_delta_y)
 
+        # init the view matrix
+        glPushMatrix()
+        glLoadIdentity()
+        
         # Player Movement
         player.move()
+
+        # Rotate camera left or right
+        player.camera_horizontal(mouse_delta_x)
+
+        # multiply the current matrix by the get the new view matrix and store the final vie matrix 
+        glMultMatrixf(viewMatrix)
+        viewMatrix = glGetFloatv(GL_MODELVIEW_MATRIX)
+
+        # apply view matrix
+        glPopMatrix()
+        glMultMatrixf(viewMatrix)
+
+        # Clear the color and depth buffers
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+        glPushMatrix()
+
+        # Hide cursor
+        pygame.mouse.set_cursor((8,8),(0,0),(0,0,0,0,0,0,0,0),(0,0,0,0,0,0,0,0))
+        # Lock cursor in middle of screen
+        screen_width, screen_height = pygame.display.get_surface().get_size()
+        pygame.mouse.set_pos((screen_width // 2, screen_height // 2))
 
         # Draw cube
         cube.drawCube()
 
-
+        glPopMatrix()
         # Update display
         pygame.display.flip()
         pygame.time.wait(10)
